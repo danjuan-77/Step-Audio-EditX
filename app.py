@@ -479,7 +479,11 @@ if __name__ == "__main__":
         sibling_tokenizer = os.path.join(parent_dir, "Step-Audio-Tokenizer")
         sub_tokenizer = os.path.join(args.model_path, "Step-Audio-Tokenizer")
         
-        if os.path.exists(sibling_tokenizer):
+        # For HuggingFace/ModelScope paths (e.g., "stepfun-ai/xxx"), always use sibling path
+        # since os.path.exists() only works for local filesystem
+        if model_source in [ModelSource.HUGGINGFACE, ModelSource.MODELSCOPE]:
+            tokenizer_base_path = sibling_tokenizer
+        elif os.path.exists(sibling_tokenizer):
             tokenizer_base_path = sibling_tokenizer
         else:
             tokenizer_base_path = sub_tokenizer

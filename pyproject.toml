@@ -1,7 +1,7 @@
 [project]
 name = "step-audio-editx"
 version = "0.1.0"
-description = "Add your description here"
+description = "Step-Audio-EditX"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -19,9 +19,14 @@ dependencies = [
     "torch-complex>=0.4.4",
     "torchcodec>=0.9.1",
     "transformers>=4.57.5",
+    "typer>=0.21.1",
+    "vllm",
     "whisper>=1.1.10",
 ]
 
 [tool.uv]
 # Allow searching multiple indexes for best match
 index-strategy = "unsafe-best-match"
+
+[tool.uv.sources]
+vllm = { url = "https://wheels.vllm.ai/c826c72a9633454679871fcb81fbc31fe03fb150/vllm-0.14.0rc2.dev125%2Bgc826c72a9-cp38-abi3-manylinux_2_31_x86_64.whl" }
