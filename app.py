@@ -73,26 +73,24 @@ class EditxTab:
     def generate_clone(self, prompt_text_input, prompt_audio_input, generated_text, edit_type, edit_info, state):
         """Generate cloned audio"""
         self.logger.info("Starting voice cloning process")
-        state['history_audio'] = []
-        state['history_messages'] = []
 
         # Input validation
         if not prompt_text_input or prompt_text_input.strip() == "":
             error_msg = "[Error] Uploaded text cannot be empty."
             self.logger.error(error_msg)
-            return [{"role": "user", "content": error_msg}], state
+            return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
         if not prompt_audio_input:
             error_msg = "[Error] Uploaded audio cannot be empty."
             self.logger.error(error_msg)
-            return [{"role": "user", "content": error_msg}], state
+            return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
         if not generated_text or generated_text.strip() == "":
             error_msg = "[Error] Clone content cannot be empty."
             self.logger.error(error_msg)
-            return [{"role": "user", "content": error_msg}], state
+            return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
         if edit_type != "clone":
             error_msg = "[Error] CLONE button must use clone task."
             self.logger.error(error_msg)
-            return [{"role": "user", "content": error_msg}], state
+            return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
 
         try:
             # Use common_tts_engine for cloning
@@ -128,12 +126,12 @@ class EditxTab:
             else:
                 error_msg = "[Error] Clone failed"
                 self.logger.error(error_msg)
-                return [{"role": "user", "content": error_msg}], state
+                return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
 
         except Exception as e:
             error_msg = f"[Error] Clone failed: {str(e)}"
             self.logger.error(error_msg)
-            return [{"role": "user", "content": error_msg}], state
+            return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
         
     def generate_edit(self, prompt_text_input, prompt_audio_input, generated_text, edit_type, edit_info, state):
         """Generate edited audio"""
@@ -143,7 +141,7 @@ class EditxTab:
         if not prompt_audio_input:
             error_msg = "[Error] Uploaded audio cannot be empty."
             self.logger.error(error_msg)
-            return [{"role": "user", "content": error_msg}], state
+            return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
 
         try:
             # Determine which audio to use
@@ -200,12 +198,12 @@ class EditxTab:
             else:
                 error_msg = "[Error] Edit failed"
                 self.logger.error(error_msg)
-                return [{"role": "user", "content": error_msg}], state
+                return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
 
         except Exception as e:
             error_msg = f"[Error] Edit failed: {str(e)}"
             self.logger.error(error_msg)
-            return [{"role": "user", "content": error_msg}], state
+            return self.history_messages_to_show(state["history_messages"]) + [{"role": "user", "content": error_msg}], state
 
     def clear_history(self, state):
         """Clear conversation history"""
