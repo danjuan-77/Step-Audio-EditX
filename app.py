@@ -401,7 +401,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max-model-len",
         type=int,
-        default=8192,
+        default=3072,
         help="Maximum model sequence length, affects KV cache size (default: 8192)"
     )
     parser.add_argument(

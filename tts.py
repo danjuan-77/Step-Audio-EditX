@@ -145,7 +145,6 @@ class StepAudioTTS:
         """
         try:
             logger.debug(f"Starting voice cloning: {prompt_wav_path}")
-            # prompt_wav, _ = torchaudio.load(prompt_wav_path)
             vq0206_codes, vq02_codes_ori, vq06_codes_ori, speech_feat, _, speech_embedding = (
                 self.preprocess_prompt_wav(prompt_wav_path)
             )
@@ -160,6 +159,7 @@ class StepAudioTTS:
                 prompt_speaker,
                 prompt_wav_tokens,
             )
+
             output_ids = self._generate(token_ids, max_tokens=8192 - len(token_ids))
             logger.debug("Voice cloning generation completed")
             vq0206_codes_vocoder = torch.tensor([vq0206_codes], dtype=torch.long) - 65536
@@ -178,21 +178,21 @@ class StepAudioTTS:
 
     def edit(
         self,
-        input_audio_path: str,
-        audio_text: str,
+        prompt_wav_path: str,
+        prompt_text: str,
         edit_type: str,
         edit_info: Optional[str] = None,
-        text: Optional[str] = None
+        target_text: Optional[str] = None
     ) -> Tuple[torch.Tensor, int]:
         """
         Edit audio based on specified edit type
 
         Args:
-            input_audio_path: Path to input audio file
-            audio_text: Text content of input audio
+            prompt_wav_path: Path to reference audio file
+            prompt_text: Text content of reference audio
             edit_type: Type of edit (emotion, style, speed, etc.)
             edit_info: Specific edit information (happy, sad, etc.)
-            text: Target text for para-linguistic editing
+            target_text: Target text for para-linguistic editing
 
         Returns:
             Tuple[torch.Tensor, int]: Edited audio tensor and sample rate
@@ -200,12 +200,12 @@ class StepAudioTTS:
         try:
             logger.debug(f"Starting audio editing: {edit_type} - {edit_info}")
             vq0206_codes, vq02_codes_ori, vq06_codes_ori, speech_feat, _, speech_embedding = (
-                self.preprocess_prompt_wav(input_audio_path)
+                self.preprocess_prompt_wav(prompt_wav_path)
             )
             audio_tokens = self.audio_tokenizer.merge_vq0206_to_token_str(
                 vq02_codes_ori, vq06_codes_ori
             )
-            instruct_prefix = self._build_audio_edit_instruction(audio_text, edit_type, edit_info, text)
+            instruct_prefix = self._build_audio_edit_instruction(prompt_text, edit_type, edit_info, target_text)
 
             prompt_tokens = self._encode_audio_edit_prompt(
                 self.edit_sys_prompt, instruct_prefix, audio_tokens
@@ -318,68 +318,30 @@ class StepAudioTTS:
         self, sys_prompt: str, instruct_prefix: str, audio_token_str: str
     ) -> list[int]:
         """Encode audio edit prompt to token sequence"""
-        audio_token_str = audio_token_str.strip()
-        _prefix_tokens = self.tokenizer.encode("\n")
-        history = [1]
-        sys_tokens = self.tokenizer.encode("\n" + f" system\n{sys_prompt}")
-        sys_tokens = sys_tokens[len(_prefix_tokens):]
-        history.extend([4] + sys_tokens + [3])
+        messages = [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": f"{instruct_prefix}\n{audio_token_str}\n"}
+        ]
 
-        qrole_toks = self.tokenizer.encode("\n" + " human\n")
-        qrole_toks = qrole_toks[len(_prefix_tokens):]
+        return self.tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
 
-        arole_toks = self.tokenizer.encode("\n" + " assistant\n")
-        arole_toks = arole_toks[len(_prefix_tokens):]
-
-        human_turn_toks = self.tokenizer.encode(
-            "\n" + f"{instruct_prefix}\n{audio_token_str}\n"
-        )
-        human_turn_toks = human_turn_toks[len(_prefix_tokens):]
-
-        history.extend(
-            [4] 
-            + qrole_toks 
-            + human_turn_toks 
-            + [3] 
-            + [4] 
-            + arole_toks
-        )
-        return history
 
     def _encode_audio_edit_clone_prompt(
         self, text: str, prompt_text: str, prompt_speaker: str, prompt_wav_tokens: str
     ):
-        prompt = self.edit_clone_sys_prompt_tpl.format(
+        
+        sys_prompt = self.edit_clone_sys_prompt_tpl.format(
             speaker=prompt_speaker,
             prompt_text=prompt_text,
             prompt_wav_tokens=prompt_wav_tokens
         )
-        _prefix_tokens = self.tokenizer.encode("\n")
+        messages = [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": f"{text}"}
+        ]
 
-        sys_tokens = self.tokenizer.encode("\n" + f" system\n{prompt}")
-        sys_tokens = sys_tokens[len(_prefix_tokens):]
+        return self.tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
 
-        history = [1]
-        history.extend([4] + sys_tokens + [3])
-
-        target_token_encode = self.tokenizer.encode("\n" + text)
-        target_tokens = target_token_encode[len(_prefix_tokens):]
-
-        qrole_toks = self.tokenizer.encode("\n" + " human\n")
-        qrole_toks = qrole_toks[len(_prefix_tokens):]
-
-        arole_toks = self.tokenizer.encode("\n" + " assistant\n")
-        arole_toks = arole_toks[len(_prefix_tokens):]
-
-        history.extend(
-            [4]
-            + qrole_toks
-            + target_tokens
-            + [3]
-            + [4]
-            + arole_toks
-        )
-        return history
 
     def detect_instruction_name(self, text):
         instruction_name = ""
