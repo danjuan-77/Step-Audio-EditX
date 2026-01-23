@@ -60,11 +60,3 @@ index-strategy = "unsafe-best-match"
 [tool.uv.sources]
 vllm = { url = "https://wheels.vllm.ai/c826c72a9633454679871fcb81fbc31fe03fb150/vllm-0.14.0rc2.dev125%2Bgc826c72a9-cp38-abi3-manylinux_2_31_x86_64.whl" }
 
-[[tool.uv.index]]
-url = "http://mirrors.i.basemind.com/pypi/simple/"
-name = "basemind-mirror"
-default = true
-
-[[tool.uv.index]]
-url = "http://pypi.i.basemind.com/brain/dev/+simple"
-name = "basemind-dev"
