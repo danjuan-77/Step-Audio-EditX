@@ -467,8 +467,8 @@ docker run --rm --gpus all \
 # zero-shot cloning
 # The path of the generated audio file is output/fear_zh_female_prompt_cloned.wav
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-text "我总觉得，有人在跟着我，我能听到奇怪的脚步声。" \
     --prompt-audio "examples/fear_zh_female_prompt.wav" \
     --generated-text "可惜没有如果，已经发生的事情终究是发生了。" \
@@ -476,8 +476,8 @@ python3 tts_infer.py \
     --output-dir ./output 
 
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-text "His political stance was conservative, and he was particularly close to margaret thatcher." \
     --prompt-audio "examples/zero_shot_en_prompt.wav" \
     --generated-text "Underneath the courtyard is a large underground exhibition room which connects the two buildings.	" \
@@ -488,8 +488,8 @@ python3 tts_infer.py \
 # There will be one or multiple wave files corresponding to each edit iteration, for example: output/fear_zh_female_prompt_edited_iter1.wav, output/fear_zh_female_prompt_edited_iter2.wav, ...
 # emotion; fear
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-text "我总觉得，有人在跟着我，我能听到奇怪的脚步声。" \
     --prompt-audio "examples/fear_zh_female_prompt.wav" \
     --edit-type "emotion" \
@@ -498,8 +498,8 @@ python3 tts_infer.py \
 
 # emotion; happy
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-text "You know, I just finished that big project and feel so relieved. Everything seems easier and more colorful, what a wonderful feeling!" \
     --prompt-audio "examples/en_happy_prompt.wav" \
     --edit-type "emotion" \
@@ -509,8 +509,8 @@ python3 tts_infer.py \
 # style; whisper
 # for style whisper, the edit iteration num should be set bigger than 1 to get better results.
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-text "比如在工作间隙，做一些简单的伸展运动，放松一下身体，这样，会让你更有精力." \
     --prompt-audio "examples/whisper_prompt.wav" \
     --edit-type "style" \
@@ -520,8 +520,8 @@ python3 tts_infer.py \
 # paraliguistic 
 # supported tags, Breathing, Laughter, Surprise-oh, Confirmation-en, Uhm, Surprise-ah, Surprise-wa, Sigh, Question-ei, Dissatisfaction-hnn
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-text "我觉得这个计划大概是可行的，不过还需要再仔细考虑一下。" \
     --prompt-audio "examples/paralingustic_prompt.wav" \
     --generated-text "我觉得这个计划大概是可行的，[Uhm]不过还需要再仔细考虑一下。" \
@@ -531,8 +531,8 @@ python3 tts_infer.py \
 # denoise
 # Prompt text is not needed.
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-audio "examples/denoise_prompt.wav"\
     --edit-type "denoise" \
     --output-dir ./output 
@@ -540,8 +540,8 @@ python3 tts_infer.py \
 # vad 
 # Prompt text is not needed.
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-audio "examples/vad_prompt.wav" \
     --edit-type "vad" \
     --output-dir ./output 
@@ -549,8 +549,8 @@ python3 tts_infer.py \
 # speed
 # supported edit-info: faster, slower, more faster, more slower
 python3 tts_infer.py \
-    --model-path where_you_download_dir \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --prompt-text "上次你说鞋子有点磨脚，我给你买了一双软软的鞋垫。" \
     --prompt-audio "examples/speed_prompt.wav" \
     --edit-type "speed" \
@@ -571,8 +571,8 @@ python app.py --model-path where_you_download_dir --tokenizer-path where_you_dow
 
 # Using pre-quantized AWQ 4-bit models, memory-efficient mode (for limited GPU memory, ~6-8GB usage)
 python app.py \
-    --model-path path/to/quantized/model \
-    --tokenizer-path where_you_download_dir \
+    --model-path ${where_you_download_dir}/Step-Audio-EditX \
+    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
     --model-source local \
     --gpu-memory-utilization 0.1 \
     --enforce-eager \
