@@ -4,17 +4,24 @@
 </p>
 
 <div align="center">
-    <a href="https://stepaudiollm.github.io/step-audio-editx/"><img src="https://img.shields.io/static/v1?label=Demo%20Page&message=Web&color=green"></a> &ensp;
+  <a href="https://stepaudiollm.github.io/step-audio-editx/"><img src="https://img.shields.io/static/v1?label=Demo%20Page&message=Web&color=green"></a> &ensp;
   <a href="https://arxiv.org/abs/2511.03601"><img src="https://img.shields.io/static/v1?label=Tech%20Report&message=Arxiv&color=red"></a> &ensp;
   <a href="https://huggingface.co/stepfun-ai/Step-Audio-EditX"><img src="https://img.shields.io/static/v1?label=Step-Audio-EditX&message=HuggingFace&color=yellow"></a> &ensp;
-    <a href="https://modelscope.cn/models/stepfun-ai/Step-Audio-EditX"><img src="https://img.shields.io/static/v1?label=Step-Audio-EditX&message=ModelScope&color=blue"></a> &ensp;
+
+  
+  <a href="https://modelscope.cn/models/stepfun-ai/Step-Audio-EditX"><img src="https://img.shields.io/static/v1?label=Step-Audio-EditX&message=ModelScope&color=blue"></a> &ensp;
   <a href="https://huggingface.co/spaces/stepfun-ai/Step-Audio-EditX"><img src="https://img.shields.io/static/v1?label=Space%20Playground&message=HuggingFace&color=yellow"></a> &ensp;
+  <a href="https://www.stepfun.com/studio/audio?tab=edit"><img src="https://img.shields.io/static/v1?label=Space%20Playground&message=StepFun&color=blue"></a> &ensp;
 </div>
 
 ## 🔥🔥🔥 News!!！
-* Jan 23, 2026: 🌟 Training and inference for vLLM are now supported. Thanks to the vLLM team!
-* Jan 23, 2026: 💻 We release the GRPO training code.
-* Jan 23, 2026: 🧩 New Model Release: Now supporting more paralinguistic tags.
+* Jan 29, 2026: 
+  * 🧩 New Model Release: 
+    * The model achieves a better score on emotion, speaking style and paralinguistic.
+    * More **paralinguistic** tags have been added, including **`exhale`**, **`snort`**, **`inhale`**, **`chuckle`**, **`clears throat`**, **`giggle`**.
+    * Welcome to try out at [StepFun Audio Studio](https://www.stepfun.com/studio/audio?tab=edit)
+  * 💻 We release the **SFT**, **GRPO** and **DPO** training code.
+  * 🌟 Training and inference for **vLLM** are now supported. Thanks to the vLLM team!
 * Nov 28, 2025: 🚀 New Model Release: Now supporting **`Japanese`** and **`Korean`** languages.
 * Nov 23, 2025: 📊 [Step-Audio-Edit-Benchmark](https://github.com/stepfun-ai/Step-Audio-Edit-Benchmark) Released!
 * Nov 19, 2025: ⚙️ We release a **new version** of our model, which **supports polyphonic pronunciation control** and improves the performance of emotion, speaking style, and paralinguistic editing.
@@ -34,8 +41,9 @@ We are open-sourcing Step-Audio-EditX, a powerful **3B-parameter** LLM-based **R
   - [x] Step-Audio-EditX
   - [x] Step-Audio-EditX-Int4
 - [ ] Training Code
+  - [x] SFT training
   - [x] GRPO training
-  - [ ] SFT training
+  - [x] DPO training
   - [ ] PPO training
 - [ ] ⏳ Feature Support Plan
   - [ ] Editing
@@ -420,8 +428,6 @@ The following table shows the requirements for running Step-Audio-EditX model (b
 - Python >= 3.12
 - [PyTorch >= 2.9.1](https://pytorch.org/)
 - [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
-  
-We recommend using uv to quickly set up a Python environment.
 
 ```bash
 git clone https://github.com/stepfun-ai/Step-Audio-EditX.git
@@ -446,7 +452,7 @@ where_you_download_dir
 
 #### Run with Docker
 
-You can also set up the environment required for running Step-Audio-EditX using the provided Dockerfile.
+You can set up the environment required for running Step-Audio-EditX using the provided Dockerfile.
 
 ```bash
 # build docker
@@ -467,8 +473,8 @@ docker run --rm --gpus all \
 # zero-shot cloning
 # The path of the generated audio file is output/fear_zh_female_prompt_cloned.wav
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-text "我总觉得，有人在跟着我，我能听到奇怪的脚步声。" \
     --prompt-audio "examples/fear_zh_female_prompt.wav" \
     --generated-text "可惜没有如果，已经发生的事情终究是发生了。" \
@@ -476,8 +482,8 @@ python3 tts_infer.py \
     --output-dir ./output 
 
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-text "His political stance was conservative, and he was particularly close to margaret thatcher." \
     --prompt-audio "examples/zero_shot_en_prompt.wav" \
     --generated-text "Underneath the courtyard is a large underground exhibition room which connects the two buildings.	" \
@@ -488,8 +494,8 @@ python3 tts_infer.py \
 # There will be one or multiple wave files corresponding to each edit iteration, for example: output/fear_zh_female_prompt_edited_iter1.wav, output/fear_zh_female_prompt_edited_iter2.wav, ...
 # emotion; fear
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-text "我总觉得，有人在跟着我，我能听到奇怪的脚步声。" \
     --prompt-audio "examples/fear_zh_female_prompt.wav" \
     --edit-type "emotion" \
@@ -498,8 +504,8 @@ python3 tts_infer.py \
 
 # emotion; happy
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-text "You know, I just finished that big project and feel so relieved. Everything seems easier and more colorful, what a wonderful feeling!" \
     --prompt-audio "examples/en_happy_prompt.wav" \
     --edit-type "emotion" \
@@ -509,8 +515,8 @@ python3 tts_infer.py \
 # style; whisper
 # for style whisper, the edit iteration num should be set bigger than 1 to get better results.
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-text "比如在工作间隙，做一些简单的伸展运动，放松一下身体，这样，会让你更有精力." \
     --prompt-audio "examples/whisper_prompt.wav" \
     --edit-type "style" \
@@ -520,8 +526,8 @@ python3 tts_infer.py \
 # paraliguistic 
 # supported tags, Breathing, Laughter, Surprise-oh, Confirmation-en, Uhm, Surprise-ah, Surprise-wa, Sigh, Question-ei, Dissatisfaction-hnn
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-text "我觉得这个计划大概是可行的，不过还需要再仔细考虑一下。" \
     --prompt-audio "examples/paralingustic_prompt.wav" \
     --generated-text "我觉得这个计划大概是可行的，[Uhm]不过还需要再仔细考虑一下。" \
@@ -531,8 +537,8 @@ python3 tts_infer.py \
 # denoise
 # Prompt text is not needed.
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-audio "examples/denoise_prompt.wav"\
     --edit-type "denoise" \
     --output-dir ./output 
@@ -540,8 +546,8 @@ python3 tts_infer.py \
 # vad 
 # Prompt text is not needed.
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-audio "examples/vad_prompt.wav" \
     --edit-type "vad" \
     --output-dir ./output 
@@ -549,8 +555,8 @@ python3 tts_infer.py \
 # speed
 # supported edit-info: faster, slower, more faster, more slower
 python3 tts_infer.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path where_you_download_dir \
+    --tokenizer-path where_you_download_dir \
     --prompt-text "上次你说鞋子有点磨脚，我给你买了一双软软的鞋垫。" \
     --prompt-audio "examples/speed_prompt.wav" \
     --edit-type "speed" \
@@ -571,8 +577,8 @@ python app.py --model-path where_you_download_dir --tokenizer-path where_you_dow
 
 # Using pre-quantized AWQ 4-bit models, memory-efficient mode (for limited GPU memory, ~6-8GB usage)
 python app.py \
-    --model-path ${where_you_download_dir}/Step-Audio-EditX \
-    --tokenizer-path ${where_you_download_dir}/Step-Audio-Tokenizer \
+    --model-path path/to/quantized/model \
+    --tokenizer-path where_you_download_dir \
     --model-source local \
     --gpu-memory-utilization 0.1 \
     --enforce-eager \
@@ -652,7 +658,6 @@ Audio-Edit enables iterative control over emotion and speaking style across all 
 
 
 <div align="center">
-
   <table border="1" cellspacing="0" cellpadding="5" style="border-collapse: collapse; font-family: sans-serif; width: auto;">
     <caption><b>Table: Generalization of Emotion, Speaking Style, and Paralinguistic Editing on Closed-Source Models.</b></caption>
     <thead>
@@ -848,6 +853,156 @@ Audio-Edit enables iterative control over emotion and speaking style across all 
         <td align="center" style="border-left: 1px solid black;">1.82</td>
         <td align="center">2.79</td>
         <td align="center">2.90</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+</div>
+<div align="center">
+  <table border="1" cellspacing="0" cellpadding="5" style="border-collapse: collapse; font-family: sans-serif; width: auto;">
+    <caption><b>Table: Generalization of Emotion, Speaking Style, and Paralinguistic Editing on Step-Audio-EditX.</b></caption>
+    <thead>
+      <tr>
+        <th rowspan="2" align="center" style="vertical-align: bottom;">Language</th>
+        <th rowspan="2" align="center" style="vertical-align: bottom;">Model</th>
+        <th colspan="4" style="border-bottom: 1px solid black;">Emotion &uarr;</th>
+        <th colspan="4" style="border-bottom: 1px solid black;">Speaking Style &uarr;</th>
+        <th colspan="2" style="border-bottom: 1px solid black; border-left: 1px solid black;">Paralinguistic &uarr;</th>
+      </tr>
+      <tr>
+        <th>Iter<sub>0</sub></th>
+        <th>Iter<sub>1</sub></th>
+        <th>Iter<sub>2</sub></th>
+        <th>Iter<sub>3</sub></th>
+        <th style="border-left: 1px solid #ccc;">Iter<sub>0</sub></th>
+        <th>Iter<sub>1</sub></th>
+        <th>Iter<sub>2</sub></th>
+        <th>Iter<sub>3</sub></th>
+        <th style="border-left: 1px solid black;">Iter<sub>0</sub></th>
+        <th>Iter<sub>1</sub></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="3" align="center" style="font-weight: bold; vertical-align: middle;">Chinese</td>
+        <td align="left">20251112</td>
+        <td align="center">57.0</td>
+        <td align="center">71.7</td>
+        <td align="center">74.5</td>
+        <td align="center">77.7</td>
+        <td align="center" style="border-left: 1px solid #ccc;">41.6</td>
+        <td align="center">62.1</td>
+        <td align="center">65.8</td>
+        <td align="center"><b>69.2</b></td>
+        <td align="center"style="border-left: 1px solid #ccc;">1.80</td>
+        <td align="center">2.89</td>
+      </tr>
+      <tr>
+        <td align="left">20251128</td>
+        <td align="center">58.7</td>
+        <td align="center">73.6</td>
+        <td align="center">75.1</td>
+        <td align="center">77.8</td>
+        <td align="center" style="border-left: 1px solid #ccc;">40.4</td>
+        <td align="center">62.1</td>
+        <td align="center">65.3</td>
+        <td align="center"><b>68.0</b></td>
+        <td align="center" style="border-left: 1px solid black;">1.80</td>
+        <td align="center">2.89</td>
+      </tr>
+      <tr>
+        <td align="left">20260129</td>
+        <td align="center"><b>60.1</b></td>
+        <td align="center"><b>75.0</b></td>
+        <td align="center"><b>79.1</b></td>
+        <td align="center"><b>81.6</b></td>
+        <td align="center" style="border-left: 1px solid #ccc;"><b>51.1</b></td>
+        <td align="center"><b>70.0</b></td>
+        <td align="center"><b>68.9</b></td>
+        <td align="center">62.4</td>
+        <td align="center" style="border-left: 1px solid black;"><b>2.07</b></td>
+        <td align="center"><b>2.91</b></td>
+      </tr>
+      <tr>
+        <td rowspan="3" align="center" style="font-weight: bold; vertical-align: middle;">English</td>
+        <td align="left">20251112</td>
+        <td align="center">49.9</td>
+        <td align="center">60.5</td>
+        <td align="center">61.5</td>
+        <td align="center">63.7</td>
+        <td align="center" style="border-left: 1px solid #ccc;"><b>50.3</b></td>
+        <td align="center">62.4</td>
+        <td align="center">64.3</td>
+        <td align="center">63.1</td>
+        <td align="center" style="border-left: 1px solid black;">2.02</td>
+        <td align="center">2.88</td>
+      </tr>
+      <tr>
+        <td align="left">20251128</td>
+        <td align="center"><b>51.2</b></td>
+        <td align="center">60.0</td>
+        <td align="center">63.1</td>
+        <td align="center">64.2</td>
+        <td align="center" style="border-left: 1px solid #ccc;">48.8</td>
+        <td align="center"><b>63.4</b></td>
+        <td align="center">62.3</td>
+        <td align="center">64.4</td>
+        <td align="center" style="border-left: 1px solid black;">2.02</td>
+        <td align="center">2.89</td>
+      </tr>
+      <tr>
+        <td align="left">20260129</td>
+        <td align="center">51.0</td>
+        <td align="center"><b>63.1</b></td>
+        <td align="center"><b>65.5</b></td>
+        <td align="center"><b>67.0</b></td>
+        <td align="center" style="border-left: 1px solid #ccc;">43.3</td>
+        <td align="center">60.4</td>
+        <td align="center"><b>66.5</b></td>
+        <td align="center"><b>69.6</b></td>
+        <td align="center" style="border-left: 1px solid black;"><b>2.18</b></td>
+        <td align="center"><b>2.93</b></td>
+      </tr>
+      <tr>
+        <td rowspan="3" align="center" style="font-weight: bold; vertical-align: middle;">Average</td>
+        <td align="left">20251112</td>
+        <td align="center">53.5</td>
+        <td align="center">66.1</td>
+        <td align="center">68.0</td>
+        <td align="center">70.7</td>
+        <td align="center" style="border-left: 1px solid #ccc;">46.0</td>
+        <td align="center">62.3</td>
+        <td align="center">65.1</td>
+        <td align="center">66.2</td>
+        <td align="center" style="border-left: 1px solid black;">1.91</td>
+        <td align="center">2.89</td>
+      </tr>
+      <tr>
+        <td align="left">20251128</td>
+        <td align="center">55.0</td>
+        <td align="center">66.8</td>
+        <td align="center">69.1</td>
+        <td align="center">71.0</td>
+        <td align="center" style="border-left: 1px solid #ccc;">44.6</td>
+        <td align="center">62.8</td>
+        <td align="center">63.8</td>
+        <td align="center"><b>66.2</b></td>
+        <td align="center" style="border-left: 1px solid black;">1.91</td>
+        <td align="center">2.89</td>
+      </tr>
+      <tr>
+        <td align="left">20260129</td>
+        <td align="center"><b>55.6</b></td>
+        <td align="center"><b>69.1</b></td>
+        <td align="center"><b>72.3</b></td>
+        <td align="center"><b>74.3</b></td>
+        <td align="center" style="border-left: 1px solid #ccc;"><b>47.2</b></td>
+        <td align="center"><b>65.2</b></td>
+        <td align="center"><b>67.7</b></td>
+        <td align="center">66.0</td>
+        <td align="center" style="border-left: 1px solid black;"><b>2.12</b></td>
+        <td align="center"><b>2.92</b></td>
       </tr>
     </tbody>
   </table>
