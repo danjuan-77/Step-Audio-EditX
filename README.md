@@ -17,7 +17,7 @@
 ## 🔥🔥🔥 News!!！
 * Jan 29, 2026: 
   * 🧩 New Model Release: 
-    * The model achieves a better score on emotion, speaking style and paralinguistic.
+    * The model demonstrates improved performance in emotion, style, and paralinguistics, with increases of 4.5%, 4.4%, and 1.0% respectively.
     * More **paralinguistic** tags have been added, including **`exhale`**, **`snort`**, **`inhale`**, **`chuckle`**, **`clears throat`**, **`giggle`**.
     * Welcome to try out at [StepFun Audio Studio](https://www.stepfun.com/studio/audio?tab=edit)
   * 💻 We release the **SFT**, **DPO** and **GRPO** training code.
