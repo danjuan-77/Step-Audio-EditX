@@ -11,7 +11,7 @@
   
   <a href="https://modelscope.cn/models/stepfun-ai/Step-Audio-EditX"><img src="https://img.shields.io/static/v1?label=Step-Audio-EditX&message=ModelScope&color=blue"></a> &ensp;
   <a href="https://huggingface.co/spaces/stepfun-ai/Step-Audio-EditX"><img src="https://img.shields.io/static/v1?label=Space%20Playground&message=HuggingFace&color=yellow"></a> &ensp;
-  <a href="https://www.stepfun.com/studio/audio?tab=edit"><img src="https://img.shields.io/static/v1?label=Space%20Playground&message=StepFun&color=blue"></a> &ensp;
+  <a href="https://www.stepfun.com/studio/audio?tab=edit"><img src="https://img.shields.io/static/v1?label=Audio%20Studio&message=StepFun&color=blue"></a> &ensp;
 </div>
 
 ## 🔥🔥🔥 News!!！
@@ -20,7 +20,7 @@
     * The model achieves a better score on emotion, speaking style and paralinguistic.
     * More **paralinguistic** tags have been added, including **`exhale`**, **`snort`**, **`inhale`**, **`chuckle`**, **`clears throat`**, **`giggle`**.
     * Welcome to try out at [StepFun Audio Studio](https://www.stepfun.com/studio/audio?tab=edit)
-  * 💻 We release the **SFT**, **GRPO** and **DPO** training code.
+  * 💻 We release the **SFT**, **DPO** and **GRPO** training code.
   * 🌟 Training and inference for **vLLM** are now supported. Thanks to the vLLM team!
 * Nov 28, 2025: 🚀 New Model Release: Now supporting **`Japanese`** and **`Korean`** languages.
 * Nov 23, 2025: 📊 [Step-Audio-Edit-Benchmark](https://github.com/stepfun-ai/Step-Audio-Edit-Benchmark) Released!
@@ -42,8 +42,8 @@ We are open-sourcing Step-Audio-EditX, a powerful **3B-parameter** LLM-based **R
   - [x] Step-Audio-EditX-Int4
 - [ ] Training Code
   - [x] SFT training
-  - [x] GRPO training
   - [x] DPO training
+  - [x] GRPO training
   - [ ] PPO training
 - [ ] ⏳ Feature Support Plan
   - [ ] Editing
