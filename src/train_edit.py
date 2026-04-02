@@ -33,6 +33,12 @@ from utils.reward_func import cer_reward_func, sim_reward_func, emo_reward_func,
 from utils.reward_func_gemini import gemini_reward_func
 from utils.reward_func_r1 import step_audio_r1_reward_func
 from utils.reward_func_genrm import genrm_reward_func
+from utils.reward_func_token import (
+    token_level_consistency_reward_func,
+    token_level_edit_reward_func,
+    token_level_follow_reward_func,
+    token_level_length_reward_func,
+)
 from dataset.edit_dataset import create_edit_dataset
 from transformers.trainer_utils import get_last_checkpoint
 import torch
@@ -134,7 +140,26 @@ class DataArguments:
     )
     reward_funcs: List[str] = field(
         default_factory=lambda: ["cer", "sim", "emo", "r1", "gemini", "mos"],
-        metadata={"help": "List of reward functions to use. Choices: cer, sim, emo, r1, gemini"}
+        metadata={
+            "help": (
+                "List of reward functions to use. "
+                "Choices include cer, sim, emo, r1, gemini, mos, my_genrm, "
+                "token_level_edit, token_level_consistency, token_level_follow, "
+                "token_level_length. "
+                "Legacy aliases mask_edit, mask_consistency, mask_follow, "
+                "mask_length are also supported."
+            )
+        }
+    )
+    mask_reward_weights: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "Optional per-reward scaling for token-level rewards, for example "
+                "'token_level_edit:1.0,token_level_length:1.0'. "
+                "Legacy mask_* reward names are also supported."
+            )
+        }
     )
 
 def main():
@@ -172,6 +197,51 @@ def main():
         update_wrapper(f, func)
         f.__name__ = name 
         return f
+
+    reward_aliases = {
+        "mask_edit": "token_level_edit",
+        "mask_consistency": "token_level_consistency",
+        "mask_follow": "token_level_follow",
+        "mask_length": "token_level_length",
+    }
+
+    def register_alias_weight(name, value, reward_weights):
+        reward_weights[name] = value
+        if name in reward_aliases:
+            reward_weights[reward_aliases[name]] = value
+            return
+        for legacy_name, canonical_name in reward_aliases.items():
+            if canonical_name == name:
+                reward_weights[legacy_name] = value
+                break
+
+    reward_weights = {}
+    if data_args.mask_reward_weights:
+        for raw_item in data_args.mask_reward_weights.split(","):
+            item = raw_item.strip()
+            if not item:
+                continue
+            if ":" not in item:
+                raise ValueError(
+                    "Invalid mask_reward_weights item "
+                    f"'{item}'. Expected the format reward_name:weight."
+                )
+            reward_name, reward_value = item.split(":", 1)
+            register_alias_weight(
+                reward_name.strip(),
+                float(reward_value.strip()),
+                reward_weights,
+            )
+        if reward_weights:
+            logger.info(f"Token-level reward weights: {reward_weights}")
+
+    def apply_reward_weight(func, weight):
+        def wrapped(*args, **kwargs):
+            return [weight * value for value in func(*args, **kwargs)]
+
+        update_wrapper(wrapped, func)
+        wrapped.__name__ = getattr(func, "__name__", "weighted_reward")
+        return wrapped
     
     reward_registry = {
         "cer": cer_reward_func,
@@ -181,6 +251,14 @@ def main():
         "r1": step_audio_r1_reward_func,
         "mos": mos_reward_func,
         "my_genrm": genrm_reward_func,
+        "token_level_edit": token_level_edit_reward_func,
+        "token_level_consistency": token_level_consistency_reward_func,
+        "token_level_follow": token_level_follow_reward_func,
+        "token_level_length": token_level_length_reward_func,
+        "mask_edit": token_level_edit_reward_func,
+        "mask_consistency": token_level_consistency_reward_func,
+        "mask_follow": token_level_follow_reward_func,
+        "mask_length": token_level_length_reward_func,
     }
     selected_reward_funcs = []
     logger.info(f"Selected reward functions: {data_args.reward_funcs}")
@@ -189,6 +267,8 @@ def main():
         if name in reward_registry:
             func_name = f"{name}_reward"
             wrapped_func = make_reward_func(reward_registry[name], func_name)
+            if name in reward_weights:
+                wrapped_func = apply_reward_weight(wrapped_func, reward_weights[name])
             selected_reward_funcs.append(wrapped_func)
         else:
             raise ValueError(f"Reward function '{name}' is not supported. Available: {list(reward_registry.keys())}")
