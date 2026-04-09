@@ -90,8 +90,20 @@ class EditDataset(Dataset):
                     try:
                         item = json.loads(line.strip())
                         
-                        # required_keys = ['source_audio', 'source_text', 'source_vq02vq06', 'target_audio', 'target_text', 'target_vq02vq06', 'edit_type', 'edit_info']
-                        required_keys = ['source_audio', 'source_text', 'source_vq02vq06', 'target_text']
+                        is_token_level_mask = (
+                            item.get("task_type", "edit") == "edit"
+                            and str(item.get("edit_type", "")).lower() == "mask"
+                        )
+                        if is_token_level_mask:
+                            required_keys = [
+                                'source_text',
+                                'source_vq02vq06',
+                                'target_text',
+                                'edit_type',
+                                'edit_info',
+                            ]
+                        else:
+                            required_keys = ['source_audio', 'source_text', 'source_vq02vq06', 'target_text']
                         if not all(key in item for key in required_keys):
                             # logging.debug(f"Missing required fields in line {line_idx} of {file_path}")
                             continue
@@ -101,9 +113,10 @@ class EditDataset(Dataset):
                         if item['task_type'] == "edit":
                             processed_item = {
                                 'source_text': item['source_text'],
-                                'source_audio': item['source_audio'],
+                                'source_audio': item.get('source_audio', ''),
                                 'source_vq02vq06': item['source_vq02vq06'],
                                 'target_text': item['target_text'],
+                                'target_vq02vq06': item.get('target_vq02vq06'),
                                 'task_type': item['task_type'],
                                 'edit_type': item['edit_type'],
                                 'edit_info': item['edit_info'],
@@ -166,6 +179,19 @@ class EditDataset(Dataset):
             instruct_prefix = f"Remove any silent portions from the given audio while preserving the voice content clearly. Ensure that the speech quality remains intact with minimal distortion, and eliminate all silence from the audio.\n"
         elif edit_type == "paralinguistic":
             instruct_prefix = f"Add some non-verbal sounds to make the audio more natural, the new text is : {text}\n  The text corresponding to the audio is: {audio_text}\n"
+        elif edit_type == "mask":
+            if safe_edit_info.lower() == "empty":
+                instruct_prefix = (
+                    f"Remove filler words and hesitation sounds, the new text is : {text}\n"
+                    f" The text corresponding to the audio is: {audio_text}\n"
+                )
+            elif safe_edit_info.lower() == "tone":
+                instruct_prefix = (
+                    f"Remove all interjections and emotional particles, the new text is : {text}\n"
+                    f" The text corresponding to the audio is: {audio_text}\n"
+                )
+            else:
+                instruct_prefix = f"Edit the audio based on text: {audio_text}\n"
         else:
             # 默认为空或抛出异常，视需求而定
             instruct_prefix = f"Edit the audio based on text: {audio_text}\n" 
@@ -188,7 +214,8 @@ class EditDataset(Dataset):
         item = self.data[idx]
         
         if item['task_type'] == "edit":
-            instruct_prefix = self._build_audio_edit_instruction(item['source_text'], item['edit_type'], item['edit_info'], item['source_text'])
+            target_instruction_text = item['target_text'] if str(item['edit_type']).lower() == "mask" else item['source_text']
+            instruct_prefix = self._build_audio_edit_instruction(item['source_text'], item['edit_type'], item['edit_info'], target_instruction_text)
             audio_str = self.processing_class.decode(item['source_vq02vq06'])
             messages = [
                 {"role": "system", "content": EDIT_SYS_PROMPT},
@@ -210,10 +237,10 @@ class EditDataset(Dataset):
             ]
             pass
 
-        return {
+        output = {
             'prompt': messages, 
             'source_text': item['source_text'], 
-            'source_audio': item['source_audio'],
+            'source_audio': item.get('source_audio', ''),
             'source_vq02vq06': item['source_vq02vq06'],
             'target_text': item['target_text'],
             'task_type': item['task_type'],
@@ -221,6 +248,9 @@ class EditDataset(Dataset):
             'edit_type': item['edit_type'],
             'edit_info': item['edit_info'],
         }
+        if item.get('target_vq02vq06') is not None:
+            output['target_vq02vq06'] = item['target_vq02vq06']
+        return output
  
     def collate_fn(self, batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         return batch

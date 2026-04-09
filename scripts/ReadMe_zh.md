@@ -200,12 +200,45 @@ export API_KEY="您的_GEMINI_API_KEY"
 REWARD_FUNCS="gemini"
 ```
 
+#### 5.3.3 Token-level 局部一致性 GRPO
+如果希望使用 token-level 的局部一致性奖励，GRPO 数据集中还需要提供 `target_vq02vq06`，用于将生成结果和目标 codec 单元做对齐比较。
+
+示例 JSONL 如下：
+```json
+{
+    "source_text": "包含口水词或语气词的原始文本",
+    "source_vq02vq06": "source_audio 音频 token 序列",
+    "target_text": "删除口水词后的目标文本",
+    "target_vq02vq06": "目标音频 token 序列",
+    "task_type": "edit",
+    "edit_type": "mask",
+    "edit_info": "empty"
+}
+```
+
+项目内置了 4 个 token-level reward：
+
+- `token_level_edit`
+- `token_level_consistency`
+- `token_level_follow`
+- `token_level_length`
+
+同时兼容历史别名 `mask_edit`、`mask_consistency`、`mask_follow`、`mask_length`。如果需要单独调节各 reward 权重，可在启动脚本中加入；模板脚本默认都设为 `1.0`：
+
+```bash
+--mask_reward_weights "token_level_edit:1.0,token_level_consistency:1.0,token_level_follow:1.0,token_level_length:1.0"
+```
+
+如果你只启用这些 token-level reward，则不需要额外部署 Flow-matching reward server。
+
 
 ### 5.4 训练脚本启动
 
 在确认 Flow-matching 服务已成功启动（端口正常监听且无报错）并完成奖励函数定义后，即可开始训练。
 
-项目提供了两个训练脚本，`run_edit_grpo.sh`使用标准的Huggingface 推理模式，`run_edit_grpo_vllm.sh`则使用 vLLM 进行推理采样，速度更快，显存利用率更高，请根据显存资源和速度需求进行选择。
+项目提供了四个训练脚本。`run_edit_grpo.sh` 使用标准 Hugging Face 推理模式，`run_edit_grpo_vllm.sh` 使用 vLLM 进行推理采样；另外还新增了 `run_edit_grpo_token_level.sh` 和 `run_edit_grpo_token_level_vllm.sh`，用于 token-level 局部一致性 GRPO 训练。
+
+这两个 token-level 脚本刻意保持为保守模板，像 `num_generations` 这类参数默认设为 `1`，需要时由使用者自行调整。
 
 在执行脚本前，请根据实际环境修改 `./scripts/` 目录下的脚本参数：
 ```bash
@@ -245,6 +278,3 @@ SERVER_IP="127.0.0.1"                     # Flow-matching 推理服务的 IP 地
 | `--use_vllm` | `false` | **启用 vLLM 加速**。开启后将使用 vLLM 引擎进行推理采样，能大幅提升采样速度并优化显存分配。 |
 | `--vllm_mode` | `"colocate"` | **部署模式**。通常设为 `colocate`。 |
 | `--vllm_gpu_memory_utilization` | `0.3` | **推理显存占用比**。指定 vLLM 占用的显存百分比（0.0-1.0）。 |
-
-
-

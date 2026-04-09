@@ -195,16 +195,53 @@ Set the `REWARD_FUNCS` parameter to "gemini":
 REWARD_FUNCS="gemini"
 ```
 
+#### 5.3.3 Token-level Local Consistency GRPO
+For token-level local consistency training, the GRPO dataset should also provide `target_vq02vq06` so the reward can compare the generated sequence against the target codec units.
+
+Example JSONL sample:
+```json
+{
+    "source_text": "Original transcript with filler words",
+    "source_vq02vq06": "Source audio tokens",
+    "target_text": "Edited transcript after removing filler words",
+    "target_vq02vq06": "Target audio tokens",
+    "task_type": "edit",
+    "edit_type": "mask",
+    "edit_info": "empty"
+}
+```
+
+The project provides four token-level rewards:
+
+- `token_level_edit`
+- `token_level_consistency`
+- `token_level_follow`
+- `token_level_length`
+
+Legacy aliases `mask_edit`, `mask_consistency`, `mask_follow`, and `mask_length` are also supported. Use `--mask_reward_weights` if you want to scale those rewards individually. The template scripts keep all weights at `1.0`:
+
+```bash
+--mask_reward_weights "token_level_edit:1.0,token_level_consistency:1.0,token_level_follow:1.0,token_level_length:1.0"
+```
+
+If you only enable these token-level rewards, the Flow-matching reward server is not required.
+
 
 ### 5.4 Launching Training
 
 Once the Flow-matching service is running (port listening without errors) and reward functions are defined, you can start training.
 
-The project provides two scripts:
+The project provides four scripts:
 
 - `run_edit_grpo.sh`: Uses standard Hugging Face inference mode.
 
 - `run_edit_grpo_vllm.sh`: Uses vLLM for inference sampling, providing faster speeds and better VRAM efficiency.
+
+- `run_edit_grpo_token_level.sh`: Uses token-level local consistency rewards in standard Hugging Face inference mode.
+
+- `run_edit_grpo_token_level_vllm.sh`: Uses token-level local consistency rewards together with vLLM sampling.
+
+Both scripts are intentionally conservative templates. Parameters such as `num_generations` are set to `1` by default and can be adjusted by users in their own environments.
 
 Update the parameters in the `./scripts/` directory before execution:
 ```bash
@@ -243,6 +280,3 @@ SERVER_IP="127.0.0.1"                     # IP of the Flow-matching service
 | `--use_vllm` | `false` | Enable vLLM acceleration for faster inference sampling. |
 | `--vllm_mode` | `"colocate"` | Deployment mode for vLLM. |
 | `--vllm_gpu_memory_utilization` | `0.3` | Percentage of VRAM (0.0-1.0) allocated for vLLM. |
-
-
-
